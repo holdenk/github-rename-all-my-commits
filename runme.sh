@@ -7,7 +7,6 @@ pip install -r requirements.txt
 
 OLD_EMAILS=()
 
-POSITIONAL=()
 while [[ $# -gt 0 ]]; do
   key="$1"
 
@@ -50,28 +49,28 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-echo "Running with FROM_GITHUB_USERNAME=$FROM_GITHUB_USERNAME TO_GITHUB_USERNAME=$TO_GITHUB_USERNAME NEW_NAME=$NEW_NAME NEW_EMAIL=$NEW_EMAIL OLD_EMAIL=$OLD_EMAILS"
+echo "Running with FROM_GITHUB_USERNAME=$FROM_GITHUB_USERNAME TO_GITHUB_USERNAME=$TO_GITHUB_USERNAME NEW_NAME=$NEW_NAME NEW_EMAIL=$NEW_EMAIL OLD_EMAIL=${OLD_EMAILS[*]}"
 
 read -p "Press enter to continue or ctrl-c to quit"
 
 pushd "${tmpdir}"
 
 if [ -z "${TO_GITHUB_NETRC}" ]; then
-  if [ -z "${TO_GITHUB_PASSWORD}"] ; then
+  if [ -z "${TO_GITHUB_PASSWORD}" ] ; then
     echo "You must specify one of --to-github-netrc or --to-github-token"
     exit 1
   fi
   TO_GITHUB_NETRC="${tmpdir}/netrc"
   echo "machine api.github.com
 login ${TO_GITHUB_USERNAME}
-password ${TO_GITHUB_PASSWORD}" > ${TO_GITHUB_NETRC}
+password ${TO_GITHUB_PASSWORD}" > "${TO_GITHUB_NETRC}"
 fi
 
 # Create the rewrite file
 
 for email in "${OLD_EMAILS[@]}"
 do
-  echo "${NEW_NAME} <${NEW_EMAIL}> <${email}>" >> ${tmpdir}/rewritemap
+  echo "${NEW_NAME} <${NEW_EMAIL}> <${email}>" >> "${tmpdir}/rewritemap"
 done
 
 echo "Using rewrite map $(cat ${tmpdir}/rewritemap)"
@@ -91,11 +90,12 @@ while true; do
   fi
   while IFS= read -r repo_name; do
     git clone "git@github.com:${FROM_GITHUB_USERNAME}/${repo_name}.git"
-    cd "${repo_name}"
+    pushd "${repo_name}" || continue
     git filter-repo --mailmap "${tmpdir}/rewritemap"
     git remote add newuser "git@github.com:${TO_GITHUB_USERNAME}/${repo_name}.git"
     curl --netrc-file "${TO_GITHUB_NETRC}" https://api.github.com/user/repos -d "{\"name\":\"${repo_name}\"}"
     git push --all newuser
+    popd
   done <<< "$RESULTS"
   PAGE=$((PAGE + 1))
 done
