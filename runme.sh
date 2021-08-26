@@ -46,6 +46,10 @@ while [[ $# -gt 0 ]]; do
      shift;
      shift;
      ;;
+   *)
+     echo "Unexpected param $1"
+     exit 1
+     ;;
   esac
 done
 
