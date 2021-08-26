@@ -81,10 +81,11 @@ read -p "Press enter to continue or ctrl-c to quit"
 
 PAGE=1
 
+sleep 1
 
 while true; do
-  #  RESULTS=$(curl -s "https://api.github.com/users/${FROM_GITHUB_USERNAME}/repos?per_page=200&page=${PAGE}" | jq -r ".[].name")
-  RESULTS=$(curl -s "https://api.github.com/orgs/apache/repos?per_page=200&page=${PAGE}" | jq -r ".[].name")
+  sleep 1
+  RESULTS=$(curl -s "https://api.github.com/users/${FROM_GITHUB_USERNAME}/repos?per_page=200&page=${PAGE}" | jq -r ".[].name")
   if [ -z "$RESULTS" ]; then
     break
   fi
