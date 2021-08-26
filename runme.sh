@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+set -ex
 tmpdir=$(mktemp -d)
 virtualenv "${tmpdir}/venv"
 source "${tmpdir}/venv/bin/activate"
@@ -70,6 +70,7 @@ fi
 
 for email in "${OLD_EMAILS[@]}"
 do
+  sleep 1
   echo "${NEW_NAME} <${NEW_EMAIL}> <${email}>" >> "${tmpdir}/rewritemap"
 done
 
